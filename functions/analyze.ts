@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { analyze } from "../lib/analyze";
 
-export const handler: APIGatewayProxyHandler = async (event) => {
+export const analysis: APIGatewayProxyHandler = async (event) => {
     const { message } = JSON.parse(event.body || "{}");
 
     if (!message) {

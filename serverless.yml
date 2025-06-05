@@ -9,7 +9,7 @@ provider:
 
 functions:
   analysis:
-    handler: src/analysis.handler
+    handler: functions/analyze.analysis
     events:
       - http:
           path: analyze

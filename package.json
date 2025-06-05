@@ -7,10 +7,15 @@
     "build": "esbuild handler.ts --bundle --platform=node --target=node18 --outfile=.build/handler.js"
   },
   "devDependencies": {
+    "@types/uuid": "^10.0.0",
     "esbuild": "^0.25.5",
     "serverless": "^4.15.0"
   },
   "dependencies": {
-    "@types/aws-lambda": "^8.10.120"
+    "@aws-sdk/client-dynamodb": "^3.823.0",
+    "@aws-sdk/lib-dynamodb": "^3.823.0",
+    "@types/aws-lambda": "^8.10.120",
+    "node-fetch": "^3.3.2",
+    "uuid": "^11.1.0"
   }
 }
