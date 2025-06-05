@@ -8,8 +8,12 @@ provider:
   region: eu-central-1
 
 functions:
-  hello:
-    handler: .build/handler.hello
+  analysis:
+    handler: src/analysis.handler
+    events:
+      - http:
+          path: analyze
+          method: post
 
 plugins:
   - serverless-esbuild
