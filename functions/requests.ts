@@ -66,8 +66,14 @@ export const submitRequest: APIGatewayProxyHandler = async (event) => {
         Item: requestData,
     }));
 
+    const returedData = {
+        requestId,
+        priority,
+        analysisData
+    };
+
     return {
         statusCode: 200,
-        body: JSON.stringify(requestId),
+        body: JSON.stringify(returedData),
     };
 };
