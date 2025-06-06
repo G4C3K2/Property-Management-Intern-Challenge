@@ -1,6 +1,6 @@
 service: ts-service
 
-frameworkVersion: '3'
+frameworkVersion: '4'
 
 provider:
   name: aws
@@ -14,16 +14,16 @@ functions:
       - http:
           path: analyze
           method: post
+  submitRequest:
+    handler: functions/requests.submitRequest
+    events:
+      - http:
+          path: requests
+          method: post
 
 plugins:
-  - serverless-esbuild
+  - serverless-offline
 
 custom:
-  esbuild:
-    bundle: true
-    minify: false
-    sourcemap: true
-    target: node18
-    platform: node
-    exclude: []
-    concurrency: 10
+  serverless-offline:
+    httpPort: 3000

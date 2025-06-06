@@ -9,7 +9,9 @@
   "devDependencies": {
     "@types/uuid": "^10.0.0",
     "esbuild": "^0.25.5",
-    "serverless": "^4.15.0"
+    "serverless": "^4.15.0",
+    "serverless-esbuild": "^1.55.0",
+    "serverless-offline": "^14.4.0"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.823.0",

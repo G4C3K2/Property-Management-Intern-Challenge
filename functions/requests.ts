@@ -5,14 +5,24 @@ import { dynamodb } from "../lib/dynamoClient";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 
 export const submitRequest: APIGatewayProxyHandler = async (event) => {
+    console.log("Received event:", JSON.stringify(event));
+
     const body = JSON.parse(event.body || "{}");
+    console.log("Parsed body:", body);
+
     if (!body) {
+        console.log("No body provided in request.");
         return {
             statusCode: 400,
             body: JSON.stringify({ error: "Request body is required" }),
         };
     }
     if (!body.tenantId || !body.message || !body.timestamp) {
+        console.log("Missing required fields:", {
+            tenantId: body.tenantId,
+            message: body.message,
+            timestamp: body.timestamp
+        });
         return {
             statusCode: 400,
             body: JSON.stringify({ error: "tenantId, message, and timestamp are required" }),
@@ -20,16 +30,19 @@ export const submitRequest: APIGatewayProxyHandler = async (event) => {
     }
 
     const { tenantId, message, timestamp } = body;
+    console.log("tenantId:", tenantId, "message:", message, "timestamp:", timestamp);
 
-    const analysisResult = await fetch(`http://localhost:3000/analysis`, {
+    const analysisResult = await fetch(`http://localhost:3000/dev/analyze`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({ message }),
     });
+    console.log("Analysis API response status:", analysisResult.status);
 
     if (!analysisResult.ok) {
+        console.log("Failed to analyze message. Status:", analysisResult.status);
         return {
             statusCode: analysisResult.status,
             body: JSON.stringify({ error: "Failed to analyze message" }),
@@ -41,8 +54,10 @@ export const submitRequest: APIGatewayProxyHandler = async (event) => {
         urgencyIndicators: number;
         priorityScore: number;  
     }
+    console.log("Analysis data:", analysisData);
 
     if (!analysisData || !analysisData.keywords || !analysisData.urgencyIndicators || !analysisData.priorityScore) {
+        console.log("Invalid analysis data:", analysisData);
         return {
             statusCode: 500,
             body: JSON.stringify({ error: "Invalid analysis data" }),
@@ -50,27 +65,32 @@ export const submitRequest: APIGatewayProxyHandler = async (event) => {
     }
 
     const requestId = uuidv4();
+    console.log("Generated requestId:", requestId);
 
     const priority = analysisData.priorityScore >= 0.6 ? "high" : analysisData.priorityScore >= 0.3 ? "medium" : "low";
+    console.log("Calculated priority:", priority);
 
     const requestData = {
         requestId,
-        tenantId,
+        TenantID: tenantId,
         message,
         timestamp,
         priority
     };
+    console.log("Request data to be saved:", requestData);
 
     await dynamodb.send(new PutCommand({
         TableName: "TenantRequests",
         Item: requestData,
     }));
+    console.log("Saved request data to DynamoDB.");
 
     const returedData = {
         requestId,
         priority,
         analysisData
     };
+    console.log("Returning data:", returedData);
 
     return {
         statusCode: 200,
