@@ -56,14 +56,6 @@ export const submitRequest: APIGatewayProxyHandler = async (event) => {
     }
     console.log("Analysis data:", analysisData);
 
-    if (!analysisData || !analysisData.keywords || !analysisData.urgencyIndicators || !analysisData.priorityScore) {
-        console.log("Invalid analysis data:", analysisData);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: "Invalid analysis data" }),
-        };
-    }
-
     const requestId = uuidv4();
     console.log("Generated requestId:", requestId);
 
@@ -75,7 +67,8 @@ export const submitRequest: APIGatewayProxyHandler = async (event) => {
         TenantID: tenantId,
         message,
         timestamp,
-        priority
+        priority,
+        resolved: false
     };
     console.log("Request data to be saved:", requestData);
 
