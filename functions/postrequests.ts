@@ -59,7 +59,7 @@ export const submitRequest: APIGatewayProxyHandler = async (event) => {
     const requestId = uuidv4();
     console.log("Generated requestId:", requestId);
 
-    const priority = analysisData.priorityScore >= 0.6 ? "high" : analysisData.priorityScore >= 0.3 ? "medium" : "low";
+    const priority = analysisData.priorityScore >= 0.6 ? "high" : analysisData.priorityScore >= 0.4 ? "medium" : "low";
     console.log("Calculated priority:", priority);
 
     const requestData = {
@@ -68,7 +68,7 @@ export const submitRequest: APIGatewayProxyHandler = async (event) => {
         message,
         timestamp,
         priority,
-        resolved: false
+        status: "unresolved"
     };
     console.log("Request data to be saved:", requestData);
 

@@ -4,10 +4,10 @@ export const analyze = (message: string) => {
     const highUrgencyIndicators = high_keywords.filter(keyword => message.toLowerCase().includes(keyword)).length;
     const mediumUrgencyIndicators = medium_keywords.filter(keyword => message.toLowerCase().includes(keyword)).length;
     const urgencyIndicators = highUrgencyIndicators + mediumUrgencyIndicators;
-    const priorityScore = urgencyIndicators * 0.3;
+    const priorityScore = Math.min((highUrgencyIndicators * 0.4 + mediumUrgencyIndicators * 0.2), 1.0);
 
     return {
-        keywords: high_keywords.filter(keyword => message.toLowerCase().includes(keyword)) && medium_keywords.filter(keyword => message.toLowerCase().includes(keyword)),
+        keywords: high_keywords.filter(keyword => message.toLowerCase().includes(keyword)).concat(medium_keywords.filter(keyword => message.toLowerCase().includes(keyword))),
         urgencyIndicators,
         priorityScore,
     };

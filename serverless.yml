@@ -14,7 +14,7 @@ functions:
       - http:
           path: analyze
           method: post
-  submitRequest:
+  submitRequests:
     handler: functions/postrequests.submitRequest
     events:
       - http:
@@ -26,6 +26,12 @@ functions:
       - http:
           path: requests
           method: get
+  changeStatus:
+    handler: functions/changestatus.changeStatus
+    events:
+      - http:
+          path: requests/{id}
+          method: put
 
 plugins:
   - serverless-offline
