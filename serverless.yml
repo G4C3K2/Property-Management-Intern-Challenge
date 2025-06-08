@@ -32,6 +32,18 @@ functions:
       - http:
           path: requests/{id}
           method: put
+  register:
+    handler: functions/register.registerTenant
+    events:
+      - http:
+          path: register
+          method: post
+  login:
+    handler: functions/login.loginTenant
+    events:
+      - http:
+          path: login
+          method: post
 
 plugins:
   - serverless-offline

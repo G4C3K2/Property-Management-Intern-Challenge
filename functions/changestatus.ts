@@ -3,7 +3,7 @@ import { dynamodb } from '../lib/dynamoClient';
 import { GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 
 export const changeStatus: APIGatewayProxyHandler = async (event) => {
-    const status = JSON.parse(event.body || "{}");
+    const { status } = JSON.parse(event.body || "{}");
     const requestId = event.pathParameters?.id;
 
     if (!status || !requestId) {
@@ -27,7 +27,10 @@ export const changeStatus: APIGatewayProxyHandler = async (event) => {
         await dynamodb.send(new UpdateCommand({
             TableName: "TenantRequests",
             Key: { requestId },
-            UpdateExpression: "SET status = :status",
+            UpdateExpression: "SET #status = :status",
+            ExpressionAttributeNames: {
+                "#status": "status"
+            },
             ExpressionAttributeValues: {
                 ":status": status
             },
