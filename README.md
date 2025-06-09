@@ -1,145 +1,170 @@
-# Serverless Node.js Starter [![Seed Status](https://api.seed.run/serverless-stack/serverless-nodejs-starter/stages/prod/build_badge)](https://console.seed.run/serverless-stack/serverless-nodejs-starter)
 
-A Serverless starter that adds ES6, TypeScript, serverless-offline, linting, environment variables, and unit test support. Part of the [Serverless Stack](http://serverless-stack.com) guide.
+# Property Management Intern Challenge
 
-[Serverless Node.js Starter](https://github.com/AnomalyInnovations/serverless-nodejs-starter) uses the [serverless-bundle](https://github.com/AnomalyInnovations/serverless-bundle) plugin and the [serverless-offline](https://github.com/dherault/serverless-offline) plugin. It supports:
+## 🏗️ Project Purpose
 
-- **Generating optimized Lambda packages with Webpack**
-- **Using ES6 or TypeScript in your handler functions**
-- **Run API Gateway locally**
-  - Use `serverless offline start`
-- **Support for unit tests**
-  - Run `npm test` to run your tests
-- **Sourcemaps for proper error messages**
-  - Error message show the correct line numbers
-  - Works in production with CloudWatch
-- **Lint your code with ESLint**
-- **Add environment variables for your stages**
-- **No need to manage Webpack or Babel configs**
+This project was built as part of a technical internship challenge.  
+It simulates a **property maintenance request system**, where:
 
----
+- Tenants can submit issue reports (e.g., leaks, noise, damage).
+- Service team members (employees) can log in, view, and manage incoming requests.
+- Each request is automatically analyzed and prioritized based on urgency keywords (AI-like mock).
+- Staff can update the status of each request (`in-progress`, `resolved`) to reflect its current state.
 
-### Demo
+## How It Works
 
-A demo version of this service is hosted on AWS - [`https://z6pv80ao4l.execute-api.us-east-1.amazonaws.com/dev/hello`](https://z6pv80ao4l.execute-api.us-east-1.amazonaws.com/dev/hello)
+- A simulated "AI" endpoint analyzes tenant messages and assigns a **priority score** based on detected urgency keywords.
+- Tenants can **submit requests**, which are stored in **DynamoDB**.
+- All actions (except analysis) require **authentication** using **JWT stored in cookies**.
+- Admins or users can **change request status**.
+- All requests can be **filtered by priority** and retrieved via an API.
 
-And here is the ES6 source behind it
+## 🧰 Tech Stack
 
-``` javascript
-export const hello = async (event, context) => {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: `Go Serverless v1.0! ${(await message({ time: 1, copy: 'Your function executed successfully!'}))}`,
-      input: event,
-    }),
-  };
-};
+| Layer              | Tech                                    |
+|--------------------|-----------------------------------------|
+| Runtime            | Node.js 22.x                            |
+| Language           | TypeScript                              |
+| Framework          | Serverless Framework                    |
+| Serverless Runtime | AWS Lambda                              |
+| DB                 | AWS DynamoDB (NoSQL)                    |
+| Auth               | JSON Web Tokens (`jose` library)        |
+| Local Dev          | `serverless-offline`, `esbuild`         |
 
-const message = ({ time, ...rest }) => new Promise((resolve, reject) =>
-  setTimeout(() => {
-    resolve(`${rest.copy} (with a delay)`);
-  }, time * 1000)
-);
+## Setup Instructions
+
+### 1. Clone the project
+
+```bash
+git clone https://github.com/G4C3K2/Property-Management-Intern-Challenge.git
+cd property-management-api
 ```
 
-### Upgrading from v1.x
+### 2. Install dependencies
 
-We have detailed instructions on how to upgrade your app to the v2.0 of the starter if you were using v1.x before. [Read about it here](https://github.com/AnomalyInnovations/serverless-nodejs-starter/releases/tag/v2.0).
-
-### Requirements
-
-- [Install the Serverless Framework](https://serverless.com/framework/docs/providers/aws/guide/installation/)
-- [Configure your AWS CLI](https://serverless.com/framework/docs/providers/aws/guide/credentials/)
-
-### Installation
-
-To create a new Serverless project.
-
-``` bash
-$ serverless install --url https://github.com/AnomalyInnovations/serverless-nodejs-starter --name my-project
+```bash
+npm install
 ```
 
-Enter the new directory
+### 3. Environment Variables
 
-``` bash
-$ cd my-project
+Create a `.env` file in the project root:
+
+```
+JWT_SECRET=your_jwt_secret_key
 ```
 
-Install the Node.js packages
+> You can generate one with `npx nanoid` or `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 
-``` bash
-$ npm install
+## AWS Configuration (IMPORTANT)
+
+This project **uses AWS DynamoDB** and requires access to your AWS account.
+
+You need to:
+
+1. Create two DynamoDB tables:
+   - `TenantRequests` — with `requestId` (string) as primary key
+   - `Tenants` — with `email` (string) as primary key
+
+2. Ensure your AWS CLI is configured with credentials:
+
+```bash
+aws configure
 ```
 
-### Usage
+> The user must have permission to use DynamoDB (PutItem, GetItem, Scan, UpdateItem)
 
-To run a function on your local
+3. Optionally set region in `dynamoClient.ts`, e.g. `region: 'eu-central-1'`
 
-``` bash
-$ serverless invoke local --function hello
+## Running Locally
+
+```bash
+npx serverless offline
 ```
 
-To simulate API Gateway locally using [serverless-offline](https://github.com/dherault/serverless-offline)
+> Local dev server at `http://localhost:3000`
 
-``` bash
-$ serverless offline start
+## Available Endpoints
+
+| Method | Path                            | Description                                              | Auth Required |
+|--------|---------------------------------|----------------------------------------------------------|---------------|
+| POST   | `/register`                     | Register a new user(employee)                            | ❌            |
+| POST   | `/login`                        | Authenticate & get JWT cookie                            | ❌            |
+| POST   | `/requests`                     | Submit a maintenance request                             | ✅            |
+| GET    | `/requests?priority="priority"` | Get all requests (filterable by "high", "medium", "low") | ✅            |
+| PUT    | `/requests/{id}`                | Change status of a request                               | ✅            |
+| POST   | `/analyze`                      | Internal AI-like message analysis                        | ❌            |
+
+## Request Body Examples
+
+### POST /register
+
+```json
+{
+    "email": "email@email.com",
+    "firstName": "Test",
+    "lastName": "Test",
+    "password": "test123"
+}
 ```
 
-Deploy your project
+### POST /login
 
-``` bash
-$ serverless deploy
+```json
+{
+    "email":"email@email.com",
+    "password": "test123"
+}
 ```
 
-Deploy a single function
+### POST /requests
 
-``` bash
-$ serverless deploy function --function hello
+```json
+{
+  "tenantId": "TEN222",
+  "message": "water pipe burst, flood",
+  "timestamp": "2025-06-06T14:00:00Z"
+}
 ```
 
-#### Running Tests
+### PUT /requests/{id}
 
-Run your tests using
-
-``` bash
-$ npm test
+```json
+{
+  "status": "in_progress"
+}
 ```
 
-We use Jest to run our tests. You can read more about setting up your tests [here](https://facebook.github.io/jest/docs/en/getting-started.html#content).
+### POST /analyze
 
-#### Environment Variables
-
-To add environment variables to your project
-
-1. Rename `env.example` to `.env`.
-2. Add environment variables for your local stage to `.env`.
-3. Uncomment `environment:` block in the `serverless.yml` and reference the environment variable as `${env:MY_ENV_VAR}`. Where `MY_ENV_VAR` is added to your `.env` file.
-4. Make sure to not commit your `.env`.
-
-#### TypeScript
-
-If [serverless-bundle](https://github.com/AnomalyInnovations/serverless-bundle) detects a `tsconfig.json` in your service root, it'll compile it using TypeScript. We have a separate starter for TypeScript here, [**Serverless TypeScript Starter**](https://github.com/AnomalyInnovations/serverless-typescript-starter).
-
-#### Linting
-
-We use [ESLint](https://eslint.org) to lint your code via [serverless-bundle](https://github.com/AnomalyInnovations/serverless-bundle).
-
-You can turn this off by adding the following to your `serverless.yml`.
-
-``` yaml
-custom:
-  bundle:
-    linting: false
+```json
+{
+  "message": "There's a gas leak in the kitchen"
+}
 ```
 
-To [override the default config](https://eslint.org/docs/user-guide/configuring), add a `.eslintrc.json` file. To ignore ESLint for specific files, add it to a `.eslintignore` file.
+## Auth Notes
 
-### Support
+- JWT is set as a `HttpOnly` cookie named `token`
+- Secured endpoints read `token` from the `Cookie` header and verify it
 
-- Open a [new issue](https://github.com/AnomalyInnovations/serverless-nodejs-starter/issues/new) if you've found a bug or have some suggestions.
-- Or submit a pull request!
+## Development Notes
 
----
+- All lambda functions are in `functions/`
+- Reusable utilities are in `lib/`
+- `verify.ts` acts as lightweight middleware for auth in `events/`
 
-This repo is maintained by [Serverless Stack](https://serverless-stack.com).
+## AWS Deployment (optional)
+
+```bash
+npx serverless deploy
+```
+
+## ✅ Testing
+
+Start with `/register`, then `/login`, then use cookie to test secured routes.
+
+## 📌 Final Note
+
+This project uses your own AWS setup.  
+You must connect your AWS credentials and DynamoDB — **nothing is preconfigured or shared**.
