@@ -4,7 +4,7 @@ import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { nanoid } from "nanoid";
 import bcrypt from "bcryptjs";
 
-export const registerTenant: APIGatewayProxyHandler = async (event) => {
+export const registerUser: APIGatewayProxyHandler = async (event) => {
     console.log("⏩ Incoming registration request");
 
     const body = JSON.parse(event.body || "{}");
@@ -33,24 +33,24 @@ export const registerTenant: APIGatewayProxyHandler = async (event) => {
 
     const { email, firstName, lastName, password } = body;
     console.log("✅ Registration input is valid");
-    console.log("🔑 Checking for existing tenant with email:", email);
+    console.log("🔑 Checking for existing user with email:", email);
 
-    const tenantId = nanoid(10);
-    console.log("🆔 Generated tenantId:", tenantId);
+    const userId = nanoid(10);
+    console.log("🆔 Generated userId:", userId);
 
     try {
-        const existTenant = await dynamodb.send(new GetCommand({
-            TableName: "Tenants",
+        const existUser = await dynamodb.send(new GetCommand({
+            TableName: "Users",
             Key: { email },
         }));
 
-        console.log("🔍 DynamoDB GET result:", existTenant);
+        console.log("🔍 DynamoDB GET result:", existUser);
 
-        if (existTenant.Item) {
-            console.warn("❌ Tenant already exists with this email:", email);
+        if (existUser.Item) {
+            console.warn("❌ User already exists with this email:", email);
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: "Tenant with this email already exists" }),
+                body: JSON.stringify({ error: "User with this email already exists" }),
             };
         }
 
@@ -58,25 +58,25 @@ export const registerTenant: APIGatewayProxyHandler = async (event) => {
         const hashedPassword = await bcrypt.hash(password, 12);
         console.log("✅ Password hashed successfully");
 
-        const newTenant = {
-            tenantId,
+        const newUser = {
+            userId,
             email,
             firstName,
             lastName,
             password: hashedPassword,
         };
 
-        console.log("💾 Saving new tenant to DynamoDB:", newTenant);
+        console.log("💾 Saving new user to DynamoDB:", newUser);
 
         await dynamodb.send(new PutCommand({
-            TableName: "Tenants",
-            Item: newTenant,
+            TableName: "Users",
+            Item: newUser,
         }));
 
-        console.log("🎉 Tenant registered successfully:", tenantId);
+        console.log("🎉 User registered successfully:", userId);
 
     } catch (error) {
-        console.error("🔥 Error during tenant registration:", error);
+        console.error("🔥 Error during user registration:", error);
         return {
             statusCode: 500,
             body: JSON.stringify({ error: "Internal server error" }),
@@ -86,7 +86,7 @@ export const registerTenant: APIGatewayProxyHandler = async (event) => {
     return {
         statusCode: 201,
         body: JSON.stringify({
-            tenantId,
+            userId,
             email,
             firstName,
             lastName,

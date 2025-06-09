@@ -3,12 +3,23 @@ import fetch from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
 import { dynamodb } from "../lib/dynamoClient";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
+import { verify } from "../events/verify";
 
 export const submitRequest: APIGatewayProxyHandler = async (event) => {
     console.log("Received event:", JSON.stringify(event));
 
     const body = JSON.parse(event.body || "{}");
     console.log("Parsed body:", body);
+
+    try {
+            const payload = await verify(event);
+        } catch (error) {
+            console.error("Verification failed:", error);
+            return {
+                statusCode: 401,
+                body: JSON.stringify({ error: "Unauthorized" }),
+            };
+        }
 
     if (!body) {
         console.log("No body provided in request.");

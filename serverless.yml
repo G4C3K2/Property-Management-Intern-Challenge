@@ -15,31 +15,31 @@ functions:
           path: analyze
           method: post
   submitRequests:
-    handler: functions/postrequests.submitRequest
+    handler: functions/postRequests.submitRequest
     events:
       - http:
           path: requests
           method: post
   getRequests:
-    handler: functions/getrequests.getRequest
+    handler: functions/getRequests.getRequest
     events:
       - http:
           path: requests
           method: get
   changeStatus:
-    handler: functions/changestatus.changeStatus
+    handler: functions/changeStatus.changeStatus
     events:
       - http:
           path: requests/{id}
           method: put
   register:
-    handler: functions/register.registerTenant
+    handler: functions/register.registerUser
     events:
       - http:
           path: register
           method: post
   login:
-    handler: functions/login.loginTenant
+    handler: functions/login.loginUser
     events:
       - http:
           path: login
@@ -47,7 +47,10 @@ functions:
 
 plugins:
   - serverless-offline
+  - serverless-dotenv-plugin
 
 custom:
   serverless-offline:
     httpPort: 3000
+  dotenv:
+    path: .env

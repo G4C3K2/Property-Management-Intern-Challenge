@@ -21,9 +21,11 @@
     "@aws-sdk/lib-dynamodb": "^3.823.0",
     "@types/aws-lambda": "^8.10.120",
     "bcryptjs": "^3.0.2",
+    "dotenv": "^16.5.0",
     "jose": "^6.0.11",
     "nanoid": "^5.1.5",
     "node-fetch": "^3.3.2",
+    "serverless-dotenv-plugin": "^6.0.0",
     "uuid": "^11.1.0"
   }
 }
